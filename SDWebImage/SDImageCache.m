@@ -205,23 +205,25 @@ static natural_t get_free_memory(void)
 
 - (void)queryDiskCacheOperation:(NSDictionary *)arguments
 {
-    NSString *key = [arguments objectForKey:@"key"];
-    NSMutableDictionary *mutableArguments = SDWIReturnAutoreleased([arguments mutableCopy]);
-
-    UIImage *image = SDScaledImageForPath(key, [NSData dataWithContentsOfFile:[self cachePathForKey:key]]);
-
-    if (image)
-    {
-        UIImage *decodedImage = [UIImage decodedImageWithImage:image];
-        if (decodedImage)
+    @autoreleasepool {
+        NSString *key = [arguments objectForKey:@"key"];
+        NSMutableDictionary *mutableArguments = SDWIReturnAutoreleased([arguments mutableCopy]);
+        
+        __autoreleasing UIImage *image = SDScaledImageForPath(key, [NSData dataWithContentsOfFile:[self cachePathForKey:key]]);
+        
+        if (image)
         {
-            image = decodedImage;
+            UIImage *decodedImage = [UIImage decodedImageWithImage:image];
+            if (decodedImage)
+            {
+                image = decodedImage;
+            }
+            
+            [mutableArguments setObject:image forKey:@"image"];
         }
-
-        [mutableArguments setObject:image forKey:@"image"];
+        
+        [self performSelectorOnMainThread:@selector(notifyDelegate:) withObject:mutableArguments waitUntilDone:NO];
     }
-
-    [self performSelectorOnMainThread:@selector(notifyDelegate:) withObject:mutableArguments waitUntilDone:NO];
 }
 
 #pragma mark ImageCache

@@ -150,7 +150,7 @@ BOOL ImageDataHasPNGPreffix(NSData *data) {
     [self.memCache setObject:image forKey:key cost:image.size.height * image.size.width * image.scale];
 
     if (toDisk) {
-        dispatch_async(self.ioQueue, ^{
+        dispatch_async(_ioQueue, ^{
             NSData *data = imageData;
 
             if (image && (recalculate || !data)) {
